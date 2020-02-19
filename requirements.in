@@ -1,1 +1,4 @@
 django
+pip-tools
+python-decouple
+python-pushover

@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 
+from decouple import config
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -20,10 +22,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "=s!wc2c85mj4s6f%)7@1uqy$y3e9$sc&&*r9k&2^po(z8rhnrf"
+SECRET_KEY = config("SECRET_KEY", default="local-dev-super-secret-key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = []
 
@@ -117,3 +119,6 @@ STATIC_URL = "/static/"
 TIME_INPUT_FORMATS = [
     "%H:%M",
 ]
+
+PUSHOVER_USER_KEY = config("PUSHOVER_USER_KEY", default="", cast=str)
+PUSHOVER_API_TOKEN = config("PUSHOVER_API_TOKEN", default="", cast=str)
