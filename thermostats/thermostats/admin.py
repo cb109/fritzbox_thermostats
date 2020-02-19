@@ -1,6 +1,7 @@
 from django.contrib import admin
+from django.utils.safestring import mark_safe
 
-from .models import Device, Rule, WeekDay
+from .models import Rule, Thermostat, WeekDay
 
 
 class WeekDayAdmin(admin.ModelAdmin):
@@ -12,6 +13,7 @@ class WeekDayAdmin(admin.ModelAdmin):
         "created_at",
         "id",
     )
+    ordering = ("order",)
 
 
 class RuleAdmin(admin.ModelAdmin):
@@ -24,6 +26,10 @@ class RuleAdmin(admin.ModelAdmin):
         "created_at",
         "id",
     )
+    ordering = (
+        "start_time",
+        "end_time",
+    )
 
     def description(self, rule):
         return str(rule)
@@ -32,7 +38,7 @@ class RuleAdmin(admin.ModelAdmin):
         return rule.days_short_description
 
 
-class DeviceAdmin(admin.ModelAdmin):
+class ThermostatAdmin(admin.ModelAdmin):
     list_display = (
         "name",
         "ain",
@@ -40,13 +46,17 @@ class DeviceAdmin(admin.ModelAdmin):
         "created_at",
         "id",
     )
+    ordering = ("id",)
 
-    def rule_descriptions(self, device):
-        rules = device.rules.all().order_by("id")
-        return [str(rule) for rule in rules]
+    @mark_safe
+    def rule_descriptions(self, thermostat):
+        rules = thermostat.rules.all().order_by("start_time", "end_time")
+        list_tags = "".join([f"<li>{rule}</li>" for rule in rules])
+        html = f"<ul>{list_tags}</ul>"
+        return html
 
 
 admin.site.site_header = "Thermostats"
-admin.site.register(Device, DeviceAdmin)
+admin.site.register(Thermostat, ThermostatAdmin)
 admin.site.register(Rule, RuleAdmin)
 admin.site.register(WeekDay, WeekDayAdmin)
