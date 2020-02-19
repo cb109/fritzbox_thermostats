@@ -11,10 +11,11 @@ click==7.0                # via pip-tools
 django==3.0.3
 idna==2.9                 # via requests
 pip-tools==4.4.1
+pyfritzhome==0.4.2
 python-decouple==3.3
 python-pushover==0.4
 pytz==2019.3              # via django
-requests==2.23.0          # via python-pushover
+requests==2.23.0          # via pyfritzhome, python-pushover
 six==1.14.0               # via pip-tools
 sqlparse==0.3.0           # via django
 urllib3==1.25.8           # via requests

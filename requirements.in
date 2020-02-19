@@ -1,4 +1,5 @@
 django
 pip-tools
+pyfritzhome
 python-decouple
 python-pushover
