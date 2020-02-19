@@ -26,7 +26,7 @@ class Rule(BaseModel):
     name = models.CharField(default="", max_length=128)
     days = models.ManyToManyField("thermostats.WeekDay", blank=True)
     start_time = models.TimeField(blank=True)
-    end_time = models.TimeField(blank=True)
+    end_time = models.TimeField(blank=True, null=True)
     temperature = models.IntegerField(default=21)
 
     @property
@@ -37,7 +37,7 @@ class Rule(BaseModel):
         return f"{self.name} ({self.days_short_description})"
 
 
-class Device(BaseModel):
+class Thermostat(BaseModel):
     ain = models.CharField(max_length=64)
     name = models.CharField(max_length=128)
     rules = models.ManyToManyField("thermostats.Rule", blank=True)
