@@ -26,7 +26,7 @@ class Rule(BaseModel):
     weekdays = models.ManyToManyField("thermostats.WeekDay", blank=True)
     start_time = models.TimeField(blank=True)
     end_time = models.TimeField(blank=True, null=True)
-    temperature = models.IntegerField(default=21)
+    temperature = models.FloatField(default=21.0)
 
     def is_valid_now(self, now=None):
         """Whether this Rule is in effect right now.
@@ -36,7 +36,7 @@ class Rule(BaseModel):
 
         """
         if now is None:
-            now = timezone.now()
+            now = timezone.localtime()
         now_time = now.time()
 
         if not now.weekday() in self.weekdays.values_list("order", flat=True):
@@ -59,7 +59,10 @@ class Rule(BaseModel):
         return ", ".join([day.abbreviation for day in self.weekdays.all()])
 
     def __str__(self):
-        return f"{self.name} ({self.weekdays_short_description})"
+        timing = f"{self.start_time.strftime('%H:%M')}"
+        if self.end_time is not None:
+            timing += f" - {self.end_time.strftime('%H:%M')}"
+        return f"{self.name}, ({self.weekdays_short_description}), {timing}"
 
 
 class Thermostat(BaseModel):
