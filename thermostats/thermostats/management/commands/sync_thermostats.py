@@ -72,6 +72,9 @@ class Command(BaseCommand):
             # TODO push notifications about change events and errors,
             #   also track stuff with an extra log model
 
+            # TODO handle rules that only trigger and are not 'valid'
+            #   over some timerange. need tracked events for this
+
             # TODO handle manual intervention by tracking temperatures
             #   and change-events; manual override should be valid until
             #   next scheduled change-event
