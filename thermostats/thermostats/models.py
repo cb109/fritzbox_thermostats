@@ -29,6 +29,12 @@ class Rule(BaseModel):
     temperature = models.IntegerField(default=21)
 
     def is_valid_now(self, now=None):
+        """Whether this Rule is in effect right now.
+
+        Checks for assigned weekdays and current time. If no end_time is
+        specified, the implicit end_time is midnight.
+
+        """
         if now is None:
             now = timezone.now()
         now_time = now.time()

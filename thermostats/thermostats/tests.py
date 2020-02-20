@@ -29,8 +29,8 @@ def all_weekdays(db):
     return WeekDay.objects.all()
 
 
-@freeze_time("19:30")
 class TestRuleIsValidNow:
+    @freeze_time("19:30")
     def test_too_early(self, all_weekdays):
         rule = baker.make(
             "thermostats.Rule",
@@ -40,6 +40,7 @@ class TestRuleIsValidNow:
         )
         assert not rule.is_valid_now()
 
+    @freeze_time("19:30")
     def test_in_between_normal_range(self, all_weekdays):
         rule = baker.make(
             "thermostats.Rule",
@@ -49,6 +50,7 @@ class TestRuleIsValidNow:
         )
         assert rule.is_valid_now()
 
+    @freeze_time("19:30")
     def test_in_between_wrapping_range(self, all_weekdays):
         rule = baker.make(
             "thermostats.Rule",
@@ -58,11 +60,26 @@ class TestRuleIsValidNow:
         )
         assert rule.is_valid_now()
 
+    @freeze_time("19:30")
     def test_too_late(self, all_weekdays):
         rule = baker.make(
             "thermostats.Rule",
             weekdays=all_weekdays,
             start_time=time(16, 0),
             end_time=time(18, 0),
+        )
+        assert not rule.is_valid_now()
+
+    @freeze_time("19:30")
+    def test_early_start_no_end(self, all_weekdays):
+        rule = baker.make(
+            "thermostats.Rule", weekdays=all_weekdays, start_time=time(16, 0),
+        )
+        assert rule.is_valid_now()
+
+    @freeze_time("19:30")
+    def test_late_start_no_end(self, all_weekdays):
+        rule = baker.make(
+            "thermostats.Rule", weekdays=all_weekdays, start_time=time(21, 0),
         )
         assert not rule.is_valid_now()
