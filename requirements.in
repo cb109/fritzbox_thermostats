@@ -1,5 +1,13 @@
+# prod
 django
-pip-tools
 pyfritzhome
 python-decouple
 python-pushover
+
+# dev only
+black
+freezegun
+model-bakery
+pip-tools
+pytest
+pytest-django
