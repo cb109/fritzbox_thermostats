@@ -12,8 +12,9 @@ black==19.10b0
 certifi==2019.11.28       # via requests
 chardet==3.0.4            # via requests
 click==7.0                # via black, pip-tools
+codecov==2.0.15
 colorama==0.4.3           # via pytest
-coverage==5.0.3           # via pytest-cov
+coverage==5.0.3           # via codecov, pytest-cov
 django==3.0.3
 freezegun==0.3.15
 idna==2.9                 # via requests
@@ -36,7 +37,7 @@ python-decouple==3.3
 python-pushover==0.4
 pytz==2019.3              # via django
 regex==2020.2.18          # via black
-requests==2.23.0          # via pyfritzhome, python-pushover
+requests==2.23.0          # via codecov, pyfritzhome, python-pushover
 six==1.14.0               # via freezegun, packaging, pip-tools, python-dateutil
 sqlparse==0.3.0           # via django
 toml==0.10.0              # via black
