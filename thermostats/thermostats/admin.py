@@ -9,7 +9,6 @@ class WeekDayAdmin(admin.ModelAdmin):
         "name",
         "order",
         "abbreviation",
-        "is_weekend",
         "created_at",
         "id",
     )
@@ -19,7 +18,7 @@ class WeekDayAdmin(admin.ModelAdmin):
 class RuleAdmin(admin.ModelAdmin):
     list_display = (
         "description",
-        "weekdays",
+        "week_days",
         "start_time",
         "end_time",
         "temperature",
@@ -34,8 +33,8 @@ class RuleAdmin(admin.ModelAdmin):
     def description(self, rule):
         return str(rule)
 
-    def weekdays(self, rule):
-        return rule.days_short_description
+    def week_days(self, rule):
+        return rule.weekdays_short_description
 
 
 class ThermostatAdmin(admin.ModelAdmin):
