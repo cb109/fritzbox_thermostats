@@ -12,7 +12,6 @@ class BaseModel(models.Model):
 class WeekDay(BaseModel):
     name = models.CharField(max_length=32)
     order = models.IntegerField()
-    is_weekend = models.BooleanField(default=False)
 
     @property
     def abbreviation(self):
@@ -24,17 +23,37 @@ class WeekDay(BaseModel):
 
 class Rule(BaseModel):
     name = models.CharField(default="", max_length=128)
-    days = models.ManyToManyField("thermostats.WeekDay", blank=True)
+    weekdays = models.ManyToManyField("thermostats.WeekDay", blank=True)
     start_time = models.TimeField(blank=True)
     end_time = models.TimeField(blank=True, null=True)
     temperature = models.IntegerField(default=21)
 
+    def is_valid_now(self, now=None):
+        if now is None:
+            now = timezone.now()
+        now_time = now.time()
+
+        if not now.weekday() in self.weekdays.values_list("order", flat=True):
+            return False
+
+        left = self.start_time
+        right = self.end_time
+        if self.end_time is not None and self.end_time < self.start_time:
+            left = self.end_time
+            right = self.start_time
+
+        if now_time < left:
+            return False
+        if right:
+            return now_time <= right
+        return True
+
     @property
-    def days_short_description(self):
-        return ", ".join([day.abbreviation for day in self.days.all()])
+    def weekdays_short_description(self):
+        return ", ".join([day.abbreviation for day in self.weekdays.all()])
 
     def __str__(self):
-        return f"{self.name} ({self.days_short_description})"
+        return f"{self.name} ({self.weekdays_short_description})"
 
 
 class Thermostat(BaseModel):
