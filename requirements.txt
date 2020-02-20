@@ -13,6 +13,7 @@ certifi==2019.11.28       # via requests
 chardet==3.0.4            # via requests
 click==7.0                # via black, pip-tools
 colorama==0.4.3           # via pytest
+coverage==5.0.3           # via pytest-cov
 django==3.0.3
 freezegun==0.3.15
 idna==2.9                 # via requests
@@ -25,6 +26,9 @@ pluggy==0.13.1            # via pytest
 py==1.8.1                 # via pytest
 pyfritzhome==0.4.2
 pyparsing==2.4.6          # via packaging
+pytest-cov==2.8.1         # via pytest-cover
+pytest-cover==3.0.0       # via pytest-coverage
+pytest-coverage==0.0
 pytest-django==3.8.0
 pytest==5.3.5
 python-dateutil==2.8.1    # via freezegun

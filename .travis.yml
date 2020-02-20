@@ -5,4 +5,4 @@ install:
   - pip install pip-tools
   - pip-sync
 script:
-  - pytest -vv -s thermostats/
+  - pytest -vv -s thermostats/ --cov=thermostats && codecov

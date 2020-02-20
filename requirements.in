@@ -6,8 +6,10 @@ python-pushover
 
 # dev only
 black
+codecov
 freezegun
 model-bakery
 pip-tools
 pytest
+pytest-coverage
 pytest-django
