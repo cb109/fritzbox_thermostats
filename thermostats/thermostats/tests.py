@@ -4,10 +4,16 @@ from datetime import time
 import pytest
 from django.conf import settings
 from django.core.management import call_command
+from django.utils import timezone
 from freezegun import freeze_time
 from model_bakery import baker
 
 from thermostats.thermostats.models import WeekDay
+
+
+@pytest.fixture(autouse=True)
+def utc_timezone(settings):
+    settings.TIMEZONE = "UTC"
 
 
 @pytest.fixture(autouse=True)

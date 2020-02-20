@@ -102,7 +102,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "MET"
+TIME_ZONE = config("TIME_ZONE", default="UTC", cast=str)
 
 USE_I18N = True
 
