@@ -1,8 +1,10 @@
 # prod
+colorlog
 django
 pyfritzhome
 python-decouple
 python-pushover
+pytz
 
 # dev only
 black

@@ -120,6 +120,39 @@ TIME_INPUT_FORMATS = [
     "%H:%M",
 ]
 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "colored": {
+            "()": "colorlog.ColoredFormatter",
+            "format": (
+                "%(asctime)s %(log_color)s[%(levelname)s]"
+                "%(reset)s%(bold_white)s %(name)s%(reset)s: "
+                "%(message)s"
+            ),
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+            "log_colors": {
+                "DEBUG": "bold_cyan",
+                "INFO": "bold_green",
+                "WARNING": "bold_yellow",
+                "ERROR": "bold_red",
+                "CRITICAL": "bold_purple",
+            },
+        },
+    },
+    "handlers": {
+        "colored_console": {"class": "logging.StreamHandler", "formatter": "colored"},
+    },
+    "loggers": {
+        "thermostats": {
+            "level": "DEBUG",
+            "handlers": ["colored_console"],
+            "propagate": True,
+        },
+    },
+}
+
 FRITZBOX_HOST = config("FRITZBOX_HOST", default="", cast=str)
 FRITZBOX_USER = config("FRITZBOX_USER", default="", cast=str)
 FRITZBOX_PASSWORD = config("FRITZBOX_PASSWORD", default="", cast=str)
