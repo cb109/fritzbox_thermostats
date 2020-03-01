@@ -56,8 +56,8 @@ class TestRuleIsValidNow:
         )
         assert rule.is_valid_now()
 
-    @freeze_time("19:30")
-    def test_in_between_wrapping_range(self, all_weekdays):
+    @freeze_time("23:30")
+    def test_in_between_wrapping_range_1(self, all_weekdays):
         rule = baker.make(
             "thermostats.Rule",
             weekdays=all_weekdays,
@@ -65,6 +65,16 @@ class TestRuleIsValidNow:
             end_time=time(6, 0),
         )
         assert rule.is_valid_now()
+
+    @freeze_time("12:15")
+    def test_in_between_wrapping_range_2(self, all_weekdays):
+        rule = baker.make(
+            "thermostats.Rule",
+            weekdays=all_weekdays,
+            start_time=time(19, 0),
+            end_time=time(10, 0),
+        )
+        assert not rule.is_valid_now()
 
     @freeze_time("19:30")
     def test_too_late(self, all_weekdays):
