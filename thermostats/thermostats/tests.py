@@ -12,8 +12,8 @@ from thermostats.thermostats.models import WeekDay
 
 
 @pytest.fixture(autouse=True)
-def utc_timezone(settings):
-    settings.TIMEZONE = "UTC"
+def utc_timezone(monkeypatch):
+    monkeypatch.setattr("django.conf.settings.TIME_ZONE", "UTC")
 
 
 @pytest.fixture(autouse=True)
