@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 
-from .models import Rule, Thermostat, WeekDay
+from .models import Rule, Thermostat, ThermostatLog, WeekDay
 
 
 class WeekDayAdmin(admin.ModelAdmin):
@@ -37,6 +37,19 @@ class RuleAdmin(admin.ModelAdmin):
         return rule.weekdays_short_description
 
 
+class ThermostatLogAdmin(admin.ModelAdmin):
+    list_display = (
+        "thermostat",
+        "rule",
+        "start_time",
+        "end_time",
+        "temperature",
+        "created_at",
+        "id",
+    )
+    ordering = ("-created_at",)
+
+
 class ThermostatAdmin(admin.ModelAdmin):
     list_display = (
         "name",
@@ -56,6 +69,7 @@ class ThermostatAdmin(admin.ModelAdmin):
 
 
 admin.site.site_header = "Thermostats"
-admin.site.register(Thermostat, ThermostatAdmin)
 admin.site.register(Rule, RuleAdmin)
+admin.site.register(Thermostat, ThermostatAdmin)
+admin.site.register(ThermostatLog, ThermostatLogAdmin)
 admin.site.register(WeekDay, WeekDayAdmin)

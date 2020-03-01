@@ -38,7 +38,6 @@ class Command(BaseCommand):
     #     parser.add_argument('poll_ids', nargs='+', type=int)
 
     def handle(self, *args, **options):
-
         now = timezone.localtime()
         weekday = WeekDay.objects.get(order=now.weekday())
         print(weekday, now.time().strftime("%H:%M"))

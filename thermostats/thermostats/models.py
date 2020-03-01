@@ -21,12 +21,18 @@ class WeekDay(BaseModel):
         return f"{self.name}"
 
 
-class Rule(BaseModel):
-    name = models.CharField(default="", max_length=128)
-    weekdays = models.ManyToManyField("thermostats.WeekDay", blank=True)
+class CommonRuleFieldsMixin(models.Model):
+    class Meta:
+        abstract = True
+
     start_time = models.TimeField(blank=True)
     end_time = models.TimeField(blank=True, null=True)
     temperature = models.FloatField(default=21.0)
+
+
+class Rule(CommonRuleFieldsMixin, BaseModel):
+    name = models.CharField(default="", max_length=128)
+    weekdays = models.ManyToManyField("thermostats.WeekDay", blank=True)
 
     def is_valid_now(self, now=None):
         """Whether this Rule is in effect right now.
@@ -62,7 +68,10 @@ class Rule(BaseModel):
         timing = f"{self.start_time.strftime('%H:%M')}"
         if self.end_time is not None:
             timing += f" - {self.end_time.strftime('%H:%M')}"
-        return f"{self.name}, ({self.weekdays_short_description}), {timing}"
+        return (
+            f"{self.name}, ({self.weekdays_short_description}), "
+            f"{timing}: {int(self.temperature)} °C"
+        )
 
 
 class Thermostat(BaseModel):
@@ -72,3 +81,11 @@ class Thermostat(BaseModel):
 
     def __str__(self):
         return f"{self.name} (AIN: '{self.ain}')"
+
+
+class ThermostatLog(CommonRuleFieldsMixin, BaseModel):
+    thermostat = models.ForeignKey("thermostats.Thermostat", on_delete=models.CASCADE)
+    rule = models.ForeignKey("thermostats.Rule", on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.thermostat}: {self.rule}"
