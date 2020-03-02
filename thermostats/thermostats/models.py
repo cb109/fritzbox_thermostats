@@ -35,29 +35,30 @@ class Rule(BaseModel):
     end_time = models.TimeField(blank=True, null=True)
     temperature = models.FloatField(default=21.0)
 
-    def is_valid_now(self, now=None):
+    def is_valid_now(self):
         """Whether this Rule is in effect right now.
 
         Checks for assigned weekdays and current time. If no end_time is
         specified, the implicit end_time is midnight.
 
         """
-        current_tz = pytz.timezone(settings.TIME_ZONE)
-        if now is None:
-            now = timezone.localtime()
-        now_time = current_tz.localize(now.time())
+        tzinfo = pytz.timezone(settings.TIME_ZONE)
+        now = timezone.localtime()
+        now_time = now.time()
 
         if not now.weekday() in self.weekdays.values_list("order", flat=True):
             return False
 
-        left = current_tz.localize(self.start_time)
-        right = current_tz.localize(self.end_time or END_OF_DAY)
+        left = self.start_time.replace(tzinfo=tzinfo)
+        right = self.end_time.replace(tzinfo=tzinfo) or END_OF_DAY.replace(
+            tzinfo=tzinfo
+        )
 
         valid_timeframes = [(left, right)]
         if right < left:
             valid_timeframes = [
-                (left, current_tz.localize(END_OF_DAY)),
-                (current_tz.localize(START_OF_DAY), right),
+                (left, END_OF_DAY.replace(tzinfo=tzinfo)),
+                (START_OF_DAY.replace(tzinfo=tzinfo), right),
             ]
 
         for left, right in valid_timeframes:
