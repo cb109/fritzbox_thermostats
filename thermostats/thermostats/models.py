@@ -1,4 +1,4 @@
-from datetime import time
+from datetime import datetime, time
 
 import pytz
 from django.conf import settings
@@ -42,23 +42,20 @@ class Rule(BaseModel):
         specified, the implicit end_time is midnight.
 
         """
-        tzinfo = pytz.timezone(settings.TIME_ZONE)
-        now = timezone.localtime()
+        now = datetime.now()
         now_time = now.time()
 
         if not now.weekday() in self.weekdays.values_list("order", flat=True):
             return False
 
-        left = self.start_time.replace(tzinfo=tzinfo)
-        right = self.end_time.replace(tzinfo=tzinfo) or END_OF_DAY.replace(
-            tzinfo=tzinfo
-        )
+        left = self.start_time
+        right = self.end_time if self.end_time else END_OF_DAY
 
         valid_timeframes = [(left, right)]
         if right < left:
             valid_timeframes = [
-                (left, END_OF_DAY.replace(tzinfo=tzinfo)),
-                (START_OF_DAY.replace(tzinfo=tzinfo), right),
+                (left, END_OF_DAY),
+                (START_OF_DAY, right),
             ]
 
         for left, right in valid_timeframes:
