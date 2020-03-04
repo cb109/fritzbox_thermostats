@@ -18,6 +18,7 @@ logger = logging.getLogger("thermostats.sync")
 
 
 def describe_temperature(temperature):
+    """Return a string description of the given temperature."""
     if temperature == TEMPERATURE_OFF:
         return "off"
     return f"{temperature} °C"
@@ -131,6 +132,24 @@ class Command(BaseCommand):
                     )
             else:
                 logger.info(f"  rule matched: {last_matching_rule}")
+                if last_matching_rule.has_been_triggered_within_timeframe_already():
+                    logger.info("  ignoring it, since it has been triggered before")
+                    if not temperatures_equal(
+                        device.target_temperature, last_matching_rule.temperature
+                    ):
+                        send_push_notification(
+                            (
+                                f"{thermostat} should be at "
+                                f"{describe_temperature(last_matching_rule.temperature)}, "
+                                f"but instead is at "
+                                f"{describe_temperature(device.target_temperature)}"
+                            ),
+                            title=(
+                                f"{thermostats.name}: Manual intervention detected "
+                                f"{describe_temperature(device.target_temperature)}"
+                            ),
+                        )
+                    return
                 if not temperatures_equal(
                     device.target_temperature, last_matching_rule.temperature
                 ):
