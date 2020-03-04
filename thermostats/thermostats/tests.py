@@ -1,5 +1,5 @@
 import os
-from datetime import time
+from datetime import datetime, time, timedelta
 
 import pytest
 from django.conf import settings
@@ -99,3 +99,84 @@ class TestRuleIsValidNow:
             "thermostats.Rule", weekdays=all_weekdays, start_time=time(21, 0),
         )
         assert not rule.is_valid_now()
+
+
+class TestRuleHasBeenTriggeredWithinTimeframeAlready:
+    @freeze_time("16:30")
+    def test_in_between_timeframe(self, all_weekdays):
+        rule = baker.make(
+            "thermostats.Rule",
+            weekdays=all_weekdays,
+            start_time=time(16, 0),
+            end_time=time(22, 0),
+        )
+        thermostat = baker.make("thermostats.Thermostat", rules=[rule])
+        assert rule.is_valid_now()
+        assert not rule.has_been_triggered_within_timeframe_already()
+
+        thermostatlog = baker.make(
+            "thermostats.ThermostatLog",
+            thermostat=thermostat,
+            rule=rule,
+            start_time=rule.start_time,
+            end_time=rule.end_time,
+            temperature=rule.temperature,
+        )
+        thermostatlog.created_at = datetime.now() - timedelta(minutes=28)
+        thermostatlog.save()
+
+        assert rule.is_valid_now()
+        assert rule.has_been_triggered_within_timeframe_already()
+
+    @freeze_time("23:30")
+    def test_after_timeframe(self, all_weekdays):
+        rule = baker.make(
+            "thermostats.Rule",
+            weekdays=all_weekdays,
+            start_time=time(16, 0),
+            end_time=time(22, 0),
+        )
+        thermostat = baker.make("thermostats.Thermostat", rules=[rule])
+        assert not rule.is_valid_now()
+        assert not rule.has_been_triggered_within_timeframe_already()
+
+        thermostatlog = baker.make(
+            "thermostats.ThermostatLog",
+            thermostat=thermostat,
+            rule=rule,
+            start_time=rule.start_time,
+            end_time=rule.end_time,
+            temperature=rule.temperature,
+        )
+        thermostatlog.created_at = datetime.now()
+        thermostatlog.save()
+
+        assert not rule.is_valid_now()
+        assert not rule.has_been_triggered_within_timeframe_already()
+
+    @freeze_time("09:00")
+    def test_wrapping_timeframe(self, all_weekdays):
+        rule = baker.make(
+            "thermostats.Rule",
+            weekdays=all_weekdays,
+            start_time=time(19, 0),
+            end_time=time(10, 0),
+        )
+        thermostat = baker.make("thermostats.Thermostat", rules=[rule])
+        assert rule.is_valid_now()
+        assert not rule.has_been_triggered_within_timeframe_already()
+
+        thermostatlog = baker.make(
+            "thermostats.ThermostatLog",
+            thermostat=thermostat,
+            rule=rule,
+            start_time=rule.start_time,
+            end_time=rule.end_time,
+            temperature=rule.temperature,
+        )
+        thermostatlog.created_at = datetime.now() - timedelta(days=1)
+        thermostatlog.created_at = thermostatlog.created_at.replace(hour=23, minute=0)
+        thermostatlog.save()
+
+        assert rule.is_valid_now()
+        assert rule.has_been_triggered_within_timeframe_already()

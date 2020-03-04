@@ -151,4 +151,11 @@ class Command(BaseCommand):
             # TODO deploy on server with a cronjob every 5-10min,
             #   make sure the timezone is correct
 
+            # TODO push updated temperature to device immediately when a
+            #   rule has been added/changed/removed that affects it right
+            #   now
+
+            # TODO take a look at battery efficieny, communicate with
+            #   thermostats only when needed
+
         # self.stdout.write(self.style.SUCCESS('Successfully closed poll "%s"' % poll_id))
