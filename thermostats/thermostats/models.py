@@ -67,7 +67,7 @@ class Rule(BaseModel):
         specified, the implicit end_time is midnight.
 
         """
-        now = datetime.now()
+        now = timezone.now()
         now_time = now.time()
 
         if not now.weekday() in self.weekdays.values_list("order", flat=True):
@@ -94,7 +94,7 @@ class Rule(BaseModel):
         if rule_has_changed:
             return False
 
-        now = datetime.now()
+        now = timezone.now()
         now_time = now.time()
 
         today = now.date()
