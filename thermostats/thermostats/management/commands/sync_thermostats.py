@@ -78,6 +78,7 @@ def change_thermostat_target_temperature(
     else:
         message += f" by using the fallback"
     logger.warn(message)
+
     if notify:
         send_push_notification(
             message,
@@ -108,7 +109,7 @@ class Command(BaseCommand):
                 thermostat.name = device.name
                 thermostat.save()
 
-            # Check rules and compute a target temperature.
+            # Check rules and and see if one applies.
             last_matching_rule = None
             logger.info(
                 f"{device.name} {describe_temperature(device.target_temperature)}"
@@ -119,6 +120,8 @@ class Command(BaseCommand):
                     logger.info("  match: " + str(rule))
                 else:
                     logger.info("  skip: " + str(rule))
+
+            # Check if we need to do something about the target temperature.
             if last_matching_rule is None:
                 logger.info("  no rule matched")
                 if not temperatures_equal(
@@ -129,37 +132,34 @@ class Command(BaseCommand):
                     )
             else:
                 logger.info(f"  rule matched: {last_matching_rule}")
-                if last_matching_rule.has_been_triggered_within_timeframe_already():
-                    logger.info("  ignoring it, since it has been triggered before")
-                    if not temperatures_equal(
-                        device.target_temperature, last_matching_rule.temperature
-                    ):
-                        send_push_notification(
-                            (
-                                f"{thermostat} should be at "
-                                f"{describe_temperature(last_matching_rule.temperature)}, "
-                                f"but instead is at "
-                                f"{describe_temperature(device.target_temperature)}"
-                            ),
-                            title=(
-                                f"{thermostats.name}: Manual intervention detected "
-                                f"{describe_temperature(device.target_temperature)}"
-                            ),
-                        )
-                    return
-                if not temperatures_equal(
+                if temperatures_equal(
                     device.target_temperature, last_matching_rule.temperature
                 ):
+                    logger.info(f"  temperature is fine, doing nothing")
+                    continue
+
+                if last_matching_rule.has_been_triggered_within_timeframe_already():
+                    logger.info("  ignoring it, since it has been triggered before")
+                    send_push_notification(
+                        (
+                            f"{thermostat} should be at "
+                            f"{describe_temperature(last_matching_rule.temperature)}, "
+                            f"but instead is at "
+                            f"{describe_temperature(device.target_temperature)}"
+                        ),
+                        title=(
+                            f"{thermostats.name}: Manual intervention detected "
+                            f"{describe_temperature(device.target_temperature)}"
+                        ),
+                    )
+                else:
                     change_thermostat_target_temperature(
                         thermostat,
                         last_matching_rule.temperature,
                         rule=last_matching_rule,
                     )
-            logger.info("")
 
-            # TODO handle manual intervention by tracking temperatures
-            #   and change-events; manual override should be valid until
-            #   next scheduled change-event
+            logger.info("")
 
             # TODO deploy on server with a cronjob every 5-10min,
             #   make sure the timezone is correct
