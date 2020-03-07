@@ -5,6 +5,7 @@ pyfritzhome
 python-decouple
 python-pushover
 pytz
+sentry-sdk
 
 # dev only
 black

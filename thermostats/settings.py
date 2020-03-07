@@ -161,3 +161,12 @@ FRITZBOX_PASSWORD = config("FRITZBOX_PASSWORD", default="", cast=str)
 
 PUSHOVER_USER_KEY = config("PUSHOVER_USER_KEY", default="", cast=str)
 PUSHOVER_API_TOKEN = config("PUSHOVER_API_TOKEN", default="", cast=str)
+
+SENTRY_DSN = config("SENTRY_DSN", default="", cast=str)
+if SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN, integrations=[DjangoIntegration()], send_default_pii=True
+    )
