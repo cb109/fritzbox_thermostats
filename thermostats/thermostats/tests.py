@@ -203,3 +203,6 @@ def test_thermostatlog_is_fallback(db):
         temperature=settings.TEMPERATURE_FALLBACK,
     )
     assert thermostatlog.is_fallback
+
+
+# TODO: test the management command with a mocked fritzbox API
