@@ -9,9 +9,6 @@ from pyfritzhome import Fritzhome
 
 from thermostats.thermostats.models import Thermostat, ThermostatLog, WeekDay
 
-TEMPERATURE_OFF = 126.5
-TEMPERATURE_FALLBACK = 0
-
 TIME_FORMAT = settings.TIME_INPUT_FORMATS[0]
 
 logger = logging.getLogger("thermostats.sync")
@@ -19,16 +16,16 @@ logger = logging.getLogger("thermostats.sync")
 
 def describe_temperature(temperature):
     """Return a string description of the given temperature."""
-    if temperature == TEMPERATURE_OFF:
+    if temperature == settings.TEMPERATURE_OFF:
         return "off"
     return f"{temperature} °C"
 
 
 def temperatures_equal(t1, t2):
     """Handle 'off' reported as 126.5, but must be set as 0."""
-    if t1 == TEMPERATURE_OFF:
+    if t1 == settings.TEMPERATURE_OFF:
         t1 = 0
-    if t2 == TEMPERATURE_OFF:
+    if t2 == settings.TEMPERATURE_OFF:
         t2 = 0
     return t1 == t2
 
@@ -69,8 +66,8 @@ def change_thermostat_target_temperature(
         temperature=new_target_temperature,
     )
 
-    # fritzbox = get_fritzbox_connection()
-    # fritzbox.set_target_temperature(thermostat.ain, new_target_temperature)
+    fritzbox = get_fritzbox_connection()
+    fritzbox.set_target_temperature(thermostat.ain, new_target_temperature)
 
     message = (
         f"{thermostat.name} is now set to "
@@ -125,10 +122,10 @@ class Command(BaseCommand):
             if last_matching_rule is None:
                 logger.info("  no rule matched")
                 if not temperatures_equal(
-                    device.target_temperature, TEMPERATURE_FALLBACK
+                    device.target_temperature, settings.TEMPERATURE_FALLBACK
                 ):
                     change_thermostat_target_temperature(
-                        thermostat, TEMPERATURE_FALLBACK
+                        thermostat, settings.TEMPERATURE_FALLBACK
                     )
             else:
                 logger.info(f"  rule matched: {last_matching_rule}")
@@ -163,9 +160,6 @@ class Command(BaseCommand):
             # TODO handle manual intervention by tracking temperatures
             #   and change-events; manual override should be valid until
             #   next scheduled change-event
-
-            # TODO handle rules that only trigger and are not 'valid'
-            #   over some timerange. need tracked events for this
 
             # TODO deploy on server with a cronjob every 5-10min,
             #   make sure the timezone is correct

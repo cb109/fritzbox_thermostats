@@ -152,6 +152,9 @@ LOGGING = {
     },
 }
 
+TEMPERATURE_OFF = config("TEMPERATURE_OFF", default=126.5, cast=float)
+TEMPERATURE_FALLBACK = config("TEMPERATURE_FALLBACK", default=0, cast=float)
+
 FRITZBOX_HOST = config("FRITZBOX_HOST", default="", cast=str)
 FRITZBOX_USER = config("FRITZBOX_USER", default="", cast=str)
 FRITZBOX_PASSWORD = config("FRITZBOX_PASSWORD", default="", cast=str)
