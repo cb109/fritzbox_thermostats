@@ -180,3 +180,26 @@ class TestRuleHasBeenTriggeredWithinTimeframeAlready:
 
         assert rule.is_valid_now()
         assert rule.has_been_triggered_within_timeframe_already()
+
+
+def test_thermostatlog_is_fallback(db):
+    thermostatlog = baker.make("thermostats.ThermostatLog")
+    assert not thermostatlog.is_fallback
+
+    thermostatlog = baker.make(
+        "thermostats.ThermostatLog",
+        rule=None,
+        start_time=None,
+        end_time=None,
+        temperature=22,
+    )
+    assert not thermostatlog.is_fallback
+
+    thermostatlog = baker.make(
+        "thermostats.ThermostatLog",
+        rule=None,
+        start_time=None,
+        end_time=None,
+        temperature=settings.TEMPERATURE_FALLBACK,
+    )
+    assert thermostatlog.is_fallback

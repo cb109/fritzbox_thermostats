@@ -148,3 +148,13 @@ class ThermostatLog(BaseModel):
 
     def __str__(self):
         return f"{self.thermostat}: {self.rule}"
+
+    @property
+    def is_fallback(self):
+        """Whether this log was created by the implicit fallback, not a rule."""
+        return (
+            self.rule is None
+            and self.start_time is None
+            and self.end_time is None
+            and self.temperature == settings.TEMPERATURE_FALLBACK
+        )
