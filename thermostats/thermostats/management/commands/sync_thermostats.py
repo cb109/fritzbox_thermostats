@@ -114,7 +114,7 @@ class Command(BaseCommand):
             logger.info(
                 f"{device.name} {describe_temperature(device.target_temperature)}"
             )
-            for rule in thermostat.rules.all().order_by("start_time", "end_time"):
+            for rule in thermostat.enabled_rules.order_by("start_time", "end_time"):
                 if rule.is_valid_now():
                     last_matching_rule = rule
                     logger.info("  match: " + str(rule))

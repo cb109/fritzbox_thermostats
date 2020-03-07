@@ -34,6 +34,7 @@ class Rule(BaseModel):
     start_time = models.TimeField(blank=True)
     end_time = models.TimeField(blank=True, null=True)
     temperature = models.FloatField(default=21.0)
+    enabled = models.BooleanField(default=True)
 
     @property
     def weekdays_short_description(self):
@@ -130,6 +131,10 @@ class Thermostat(BaseModel):
     ain = models.CharField(max_length=64)
     name = models.CharField(max_length=128)
     rules = models.ManyToManyField("thermostats.Rule", blank=True)
+
+    @property
+    def enabled_rules(self):
+        return self.rules.filter(enabled=True)
 
     def __str__(self):
         return f"{self.name} (AIN: '{self.ain}')"

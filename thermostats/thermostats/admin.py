@@ -18,6 +18,7 @@ class WeekDayAdmin(admin.ModelAdmin):
 class RuleAdmin(admin.ModelAdmin):
     list_display = (
         "description",
+        "enabled",
         "week_days",
         "start_time",
         "end_time",
@@ -63,8 +64,14 @@ class ThermostatAdmin(admin.ModelAdmin):
     @mark_safe
     def rule_descriptions(self, thermostat):
         rules = thermostat.rules.all().order_by("start_time", "end_time")
-        list_tags = "".join([f"<li>{rule}</li>" for rule in rules])
-        html = f"<ul>{list_tags}</ul>"
+        list_tags = []
+        for rule in rules:
+            tag = "<li"
+            if not rule.enabled:
+                tag += ' style="color: lightgrey"'
+            tag += f">{rule}</li>"
+            list_tags.append(tag)
+        html = f"<ul>{''.join(list_tags)}</ul>"
         return html
 
 
