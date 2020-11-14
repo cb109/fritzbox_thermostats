@@ -1,3 +1,4 @@
+import logging
 import os
 from datetime import datetime, time, timedelta
 
@@ -5,10 +6,12 @@ import pytest
 from django.conf import settings
 from django.core.management import call_command
 from django.utils import timezone
+
 from freezegun import freeze_time
 from model_bakery import baker
+from thermostats.thermostats.models import Thermostat, WeekDay
 
-from thermostats.thermostats.models import WeekDay
+logger = logging.getLogger("thermostats.tests")
 
 
 @pytest.fixture(autouse=True)
@@ -89,14 +92,18 @@ class TestRuleIsValidNow:
     @freeze_time("19:30")
     def test_early_start_no_end(self, all_weekdays):
         rule = baker.make(
-            "thermostats.Rule", weekdays=all_weekdays, start_time=time(16, 0),
+            "thermostats.Rule",
+            weekdays=all_weekdays,
+            start_time=time(16, 0),
         )
         assert rule.is_valid_now()
 
     @freeze_time("19:30")
     def test_late_start_no_end(self, all_weekdays):
         rule = baker.make(
-            "thermostats.Rule", weekdays=all_weekdays, start_time=time(21, 0),
+            "thermostats.Rule",
+            weekdays=all_weekdays,
+            start_time=time(21, 0),
         )
         assert not rule.is_valid_now()
 
@@ -205,4 +212,79 @@ def test_thermostatlog_is_fallback(db):
     assert thermostatlog.is_fallback
 
 
-# TODO: test the management command with a mocked fritzbox API
+class MockedFritzbox:
+    def login(*args, **kwargs):
+        pass
+
+    def set_target_temperature(*args, **kwargs):
+        pass
+
+    def get_devices(*args, **kwargs):
+        pass
+
+
+class MockedDevice:
+    def __init__(self, ain, name, target_temperature):
+        self.ain = ain
+        self.name = name
+        self.target_temperature = target_temperature
+        self.has_thermostat = True
+
+
+def mocked_send_push_notification(message, title=None):
+    logger.debug(title)
+    logger.debug(message)
+
+
+def test_names_synced_and_new_device_created_automatically(db, monkeypatch):
+    # Setup
+    device_livingroom = MockedDevice("11962 0785015", "Living Room", 21)
+    device_kitchen = MockedDevice("11962 0785016", "Kitchen", 21)
+
+    thermostat_livingroom = baker.make(
+        "thermostats.Thermostat", ain=device_livingroom.ain, name="Other name"
+    )
+    assert Thermostat.objects.count() == 1
+    assert thermostat_livingroom.name != device_livingroom.name
+
+    def mocked_get_fritzbox_connection():
+        return MockedFritzbox()
+
+    def mocked_get_fritzbox_thermostat_devices():
+        return [
+            device_livingroom,
+            device_kitchen,
+        ]
+
+    monkeypatch.setattr(
+        (
+            "thermostats.thermostats.management.commands."
+            "sync_thermostats.send_push_notification"
+        ),
+        mocked_send_push_notification,
+    )
+    monkeypatch.setattr(
+        (
+            "thermostats.thermostats.management.commands."
+            "sync_thermostats.get_fritzbox_connection"
+        ),
+        mocked_get_fritzbox_connection,
+    )
+    monkeypatch.setattr(
+        (
+            "thermostats.thermostats.management.commands."
+            "sync_thermostats.get_fritzbox_thermostat_devices"
+        ),
+        mocked_get_fritzbox_thermostat_devices,
+    )
+
+    # Test
+    call_command("sync_thermostats")
+
+    assert Thermostat.objects.count() == 2
+    thermostat_livingroom.refresh_from_db()
+    assert thermostat_livingroom.name == device_livingroom.name
+
+    thermostat_kitchen = Thermostat.objects.last()
+    assert thermostat_kitchen.ain == device_kitchen.ain
+    assert thermostat_kitchen.name == device_kitchen.name

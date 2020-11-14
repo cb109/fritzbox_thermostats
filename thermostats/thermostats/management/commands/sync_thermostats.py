@@ -4,9 +4,9 @@ from pprint import pprint
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
+
 from pushover import Client
 from pyfritzhome import Fritzhome
-
 from thermostats.thermostats.models import Thermostat, ThermostatLog, WeekDay
 
 TIME_FORMAT = settings.TIME_INPUT_FORMATS[0]
@@ -99,7 +99,9 @@ class Command(BaseCommand):
         logger.info("")
 
         for device in get_fritzbox_thermostat_devices():
-            thermostat = Thermostat.objects.get(ain=device.ain)
+            thermostat, created = Thermostat.objects.get_or_create(ain=device.ain)
+            if created:
+                logger.info(f"Found a new device {device.name} ({device.ain})")
 
             # Update name to reflect changes from the fritzbox admin UI.
             if thermostat.name != device.name:
