@@ -129,7 +129,7 @@ class TestRuleHasBeenTriggeredWithinTimeframeAlready:
             end_time=rule.end_time,
             temperature=rule.temperature,
         )
-        thermostatlog.created_at = datetime.now() - timedelta(minutes=28)
+        thermostatlog.created_at = timezone.now() - timedelta(minutes=28)
         thermostatlog.save()
 
         assert rule.is_valid_now()
@@ -155,7 +155,7 @@ class TestRuleHasBeenTriggeredWithinTimeframeAlready:
             end_time=rule.end_time,
             temperature=rule.temperature,
         )
-        thermostatlog.created_at = datetime.now()
+        thermostatlog.created_at = timezone.now()
         thermostatlog.save()
 
         assert not rule.is_valid_now()
@@ -181,7 +181,7 @@ class TestRuleHasBeenTriggeredWithinTimeframeAlready:
             end_time=rule.end_time,
             temperature=rule.temperature,
         )
-        thermostatlog.created_at = datetime.now() - timedelta(days=1)
+        thermostatlog.created_at = timezone.now() - timedelta(days=1)
         thermostatlog.created_at = thermostatlog.created_at.replace(hour=23, minute=0)
         thermostatlog.save()
 
